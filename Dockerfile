@@ -9,8 +9,10 @@ RUN apk update && apk add --no-cache \
     llvm20-libs \
     llvm20-linker-tools
 
-RUN ln -s "$(which clang)"   /usr/bin/clang-19 \
- && ln -s "$(which clang++)" /usr/bin/clang++-19 \
+RUN ln -sf /usr/bin/clang-20   /usr/bin/clang \
+ && ln -sf /usr/bin/clang++-20 /usr/bin/clang++ \
+ && ln -s  /usr/bin/clang-20   /usr/bin/clang-19 \
+ && ln -s  /usr/bin/clang++-20 /usr/bin/clang++-19 \
  && mkdir -p /usr/lib/llvm19/bin \
  && ln -s /usr/bin/llvm-lto /usr/lib/llvm19/bin/llvm-lto
 
