@@ -14,7 +14,7 @@ RUN ln -sf /usr/bin/clang-20   /usr/bin/clang \
  && ln -s  /usr/bin/clang-20   /usr/bin/clang-19 \
  && ln -s  /usr/bin/clang++-20 /usr/bin/clang++-19 \
  && mkdir -p /usr/lib/llvm19/bin \
- && ln -s /usr/bin/llvm-lto /usr/lib/llvm19/bin/llvm-lto
+ && ln -s /usr/lib/llvm20/bin/llvm-lto /usr/lib/llvm19/bin/llvm-lto
 
 ENV CC=clang
 
