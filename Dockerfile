@@ -18,9 +18,24 @@ RUN ln -sf /usr/bin/clang-20   /usr/bin/clang \
 
 ENV CC=clang
 
+# pgvector's Makefile defaults OPTFLAGS to -march=native, which bakes the build
+# host's full instruction set into the .so, including AVX-512 on the
+# ubuntu-latest amd64 runner, or SVE on some arm64 runners. The resulting binary
+# crashes with SIGILL on lower-baseline CPUs (DO Regular droplets, Hetzner
+# shared, older bare metal). We override OPTFLAGS with a portable per-arch
+# baseline that still keeps useful SIMD: amd64 -> x86-64-v3 (AVX2 + BMI2 + FMA,
+# no AVX-512); arm64 -> armv8-a (NEON, mandatory in base ARMv8). TARGETARCH is
+# set automatically by buildx for multi-arch builds.
+# Ref: https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels
+ARG TARGETARCH
 RUN git clone --depth 1 https://github.com/pgvector/pgvector.git \
  && cd pgvector \
- && make \
+ && case "$TARGETARCH" in \
+      amd64) OPTFLAGS="-march=x86-64-v3 -mtune=generic" ;; \
+      arm64) OPTFLAGS="-march=armv8-a -mtune=generic" ;; \
+      *)     OPTFLAGS="-mtune=generic" ;; \
+    esac \
+ && make OPTFLAGS="$OPTFLAGS" \
  && make install \
  && cd .. \
  && rm -rf pgvector
